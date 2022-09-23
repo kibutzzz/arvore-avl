@@ -1,5 +1,5 @@
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class Node {
@@ -7,24 +7,21 @@ public class Node {
   private final int value;
   private Node left;
   private Node right;
+  private Node parent;
   private int height = 0;
 
   public Node(int value) {
     this.value = value;
   }
 
-  private Node(int value, int height) {
+  private Node(int value, int height, Node parent) {
     this.value = value;
     this.height = height + 1;
+    this.parent = parent;
   }
-
 
   public int getValue() {
     return value;
-  }
-
-  private <T> Optional<T> operationOnNode(Node node, Function<Node, T> operation) {
-    return Optional.ofNullable(node).map(operation);
   }
 
   public Node search(int value) {
@@ -33,7 +30,6 @@ public class Node {
     }
 
     try {
-
       if (this.left != null) {
         return left.search(value);
       }
@@ -53,7 +49,7 @@ public class Node {
 
     if (value > this.value) {
       if (this.right == null) {
-        right = new Node(value, height);
+        right = new Node(value, height, this);
       } else {
         right.insert(value);
       }
@@ -61,7 +57,7 @@ public class Node {
     }
 
     if (this.left == null) {
-      left = new Node(value, height);
+      left = new Node(value, height, this);
     } else {
       left.insert(value);
     }
@@ -115,4 +111,37 @@ public class Node {
     }
     return "";
   }
+
+  public void delete(int i) {
+    final var node = search(i);
+
+    if (node == this) {
+      throw new IllegalStateException("Cannot delete itself");
+    }
+
+    final var parent = node.parent;
+    if (parent.left == node) {
+      if (doesOneElementExist(node)) {
+        parent.left = Objects.requireNonNullElseGet(node.left, () -> node.right);
+        return;
+      }
+
+      parent.left = null;
+      return;
+    }
+
+    if (parent.right == node) {
+      if (doesOneElementExist(node)) {
+        parent.right = Objects.requireNonNullElseGet(node.left, () -> node.right);
+        return;
+      }
+
+      parent.right = null;
+    }
+  }
+
+  private boolean doesOneElementExist(Node node) {
+    return node.left != null ^ node.right != null;
+  }
+
 }

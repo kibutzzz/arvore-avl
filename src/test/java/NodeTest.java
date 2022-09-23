@@ -151,8 +151,69 @@ class NodeTest {
 
   @Test
   void notFound() {
-    assertThrows( NoSuchElementException.class, () -> new Node(1).search(2));
+    assertThrows(NoSuchElementException.class, () -> new Node(1).search(2));
   }
 
+  @Test
+  void deleteNotPresent() {
+    final var root = new Node(3);
+
+    assertThrows(NoSuchElementException.class, () -> root.delete(2));
+  }
+
+  @Test
+  void deleteRoot() {
+    final var root = new Node(1);
+    assertThrows(IllegalStateException.class, () -> root.delete(1));
+  }
+
+  @Test
+  void deleteLeafLeft() {
+    final var root = new Node(4);
+    root.insert(2);
+    root.insert(6);
+    root.insert(1);
+    root.insert(3);
+    root.insert(5);
+    root.insert(7);
+
+    root.delete(1);
+
+
+    assertEquals("4\n" +
+        "╰R-6\n" +
+        "\t╰R-7\n" +
+        "\t╰L-5\n" +
+        "╰L-2\n" +
+        "\t╰R-3", root.toString());
+  }
+
+
+  @Test
+  void deleteNodeWithOneChild() {
+    final var root = new Node(4);
+    root.insert(2);
+    root.insert(6);
+    root.insert(3);
+    root.insert(5);
+    root.insert(7);
+
+    root.delete(2);
+
+    assertEquals("4\n" +
+            "╰R-6\n" +
+            "\t╰R-7\n" +
+            "\t╰L-5\n" +
+            "╰L-3"
+        , root.toString());
+
+    root.delete(5);
+    root.delete(6);
+
+    assertEquals("4\n" +
+            "╰R-7\n" +
+            "╰L-3"
+        , root.toString());
+  }
 
 }
